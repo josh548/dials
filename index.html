@@ -11,28 +11,24 @@
             font-family: sans-serif;
         }
 
-        #canvas {
+        canvas {
             border: 1px solid #000000;
-        }
-
-        .level {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
         }
     </style>
 </head>
 
 <body>
-    <canvas id="canvas" width="500" height="500"></canvas>
+    <canvas></canvas>
     <br>
-    <span id="speed-label1"></span>
-    <button id="increase-button1">+</button>
-    <button id="decrease-button1">-</button>
+    <span>Left Speed: <span id="speed-label1"></span></span>
+    <button id="plus-button1">+</button>
+    <button id="minus-button1">-</button>
     &nbsp;
-    <span id="speed-label2"></span>
-    <button id="increase-button2">+</button>
-    <button id="decrease-button2">-</button>
+    <span>Right Speed: <span id="speed-label2"></span></span>
+    <button id="plus-button2">+</button>
+    <button id="minus-button2">-</button>
+    &nbsp;
+    <button id="reset-button">Reset</button>
     <script src="main.js"></script>
 </body>
 

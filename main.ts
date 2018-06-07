@@ -1,9 +1,12 @@
-const canvas: HTMLCanvasElement =
-    document.getElementById("canvas") as HTMLCanvasElement;
-const squareCanvasSize: number = Math.min(canvas.width, canvas.height);
+const canvas: HTMLCanvasElement = document.querySelector("canvas") as HTMLCanvasElement;
+// Take up most of the screen but leave room for the controls
+const canvasSize: number = Math.floor(Math.min(window.innerWidth, window.innerHeight) * 0.9);
+canvas.width = canvasSize;
+canvas.height = canvasSize;
 
-const context: CanvasRenderingContext2D =
-    canvas.getContext("2d") as CanvasRenderingContext2D;
+const context: CanvasRenderingContext2D = canvas.getContext("2d") as CanvasRenderingContext2D;
+
+const pointRadius: number = 3;
 
 class Dial {
     public readonly x: number;
@@ -14,8 +17,7 @@ class Dial {
     public tangentX: number = 0;
     public tangentY: number = 0;
 
-    public constructor(x: number, y: number, radius: number,
-                       angleIncrement: number) {
+    public constructor(x: number, y: number, radius: number, angleIncrement: number) {
         this.x = x;
         this.y = y;
         this.radius = radius;
@@ -24,23 +26,28 @@ class Dial {
 
     public draw(): void {
         context.beginPath();
-        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2, true);
+        context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         context.stroke();
-        context.closePath();
+
+        context.beginPath();
+        context.arc(this.x, this.y, pointRadius, 0, Math.PI * 2);
+        context.fill();
+
         context.beginPath();
         context.moveTo(this.x, this.y);
-        const dx: number =
-            Math.cos(convertDegreesToRadians(this.angle)) * this.radius;
+        const dx: number = Math.cos(convertDegreesToRadians(this.angle)) * this.radius;
+        const dy: number = Math.sin(convertDegreesToRadians(this.angle)) * this.radius;
         this.tangentX = this.x + dx;
-        const dy: number =
-            Math.sin(convertDegreesToRadians(this.angle)) * this.radius;
         this.tangentY = this.y + dy;
         context.lineTo(this.tangentX, this.tangentY);
         context.stroke();
-        context.closePath();
+
+        context.beginPath();
+        context.arc(this.tangentX, this.tangentY, pointRadius, 0, Math.PI * 2);
+        context.fill();
     }
 
-    public updateAngle(): void {
+    public update(): void {
         this.angle += this.angleIncrement;
         if (this.angle >= 360) {
             this.angle -= 360;
@@ -55,103 +62,113 @@ function convertDegreesToRadians(degrees: number): number {
 interface Point {
     x: number;
     y: number;
-    radius: number;
 }
 
-const dial1: Dial = new Dial(Math.floor(squareCanvasSize / 4),
-                             Math.floor(squareCanvasSize / 4),
-                             Math.floor(squareCanvasSize * (3 / 16)),
-                             4);
-const dial2: Dial = new Dial(Math.floor(squareCanvasSize * (3 / 4)),
-                             Math.floor(squareCanvasSize * (3 / 4)),
-                             Math.floor(squareCanvasSize * (3 / 16)),
-                             3);
-let points: Point[] = [];
+// Dial in the second quadrant
+const dial1: Dial = new Dial(
+    Math.floor(canvasSize / 4),
+    Math.floor(canvasSize / 4),
+    Math.floor(canvasSize * (3 / 16)),
+    4,
+);
 
-function step(): void {
+// Dial in the fourth quandrant
+const dial2: Dial = new Dial(
+    Math.floor(canvasSize * (3 / 4)),
+    Math.floor(canvasSize * (3 / 4)),
+    Math.floor(canvasSize * (3 / 16)),
+    3,
+);
+
+let points: Point[] = [];
+let frameHandle: number;
+function animate(): void {
     context.clearRect(0, 0, canvas.width, canvas.height);
 
+    context.strokeStyle = "rgba(0, 0, 0, 1.0)";
     dial1.draw();
-    dial1.updateAngle();
+    dial1.update();
     dial2.draw();
-    dial2.updateAngle();
+    dial2.update();
 
+    context.strokeStyle = "rgba(0, 0, 0, 0.25)";
     context.beginPath();
     context.moveTo(dial1.tangentX, dial1.tangentY);
-    context.setLineDash([5]);
     context.lineTo(dial2.tangentX, dial1.tangentY);
     context.stroke();
-    context.closePath();
-
     context.beginPath();
     context.moveTo(dial2.tangentX, dial2.tangentY);
-    context.setLineDash([5]);
     context.lineTo(dial2.tangentX, dial1.tangentY);
     context.stroke();
-    context.closePath();
 
-    context.setLineDash([]);
-    points.push({
-        x: dial2.tangentX,
-        y: dial1.tangentY,
-        radius: 1,
-    });
+    context.beginPath();
+    context.arc(dial2.tangentX, dial1.tangentY, pointRadius, 0, Math.PI * 2);
+    context.fill();
+
+    context.strokeStyle = "rgba(0, 0, 0, 1.0)";
+    const newPoint: Point = { x: dial2.tangentX, y: dial1.tangentY };
+    points.push(newPoint);
     for (let i: number = 0; i < points.length - 1; i++) {
         context.beginPath();
         context.moveTo(points[i].x, points[i].y);
         context.lineTo(points[i + 1].x, points[i + 1].y);
         context.stroke();
-        context.closePath();
     }
 
-    requestAnimationFrame(step);
+    if (points.length > 1 && newPoint.x === points[0].x && newPoint.y === points[0].y) {
+        return;
+    }
+
+    frameHandle = requestAnimationFrame(animate);
 }
 
-step();
-
-const increaseButton1: HTMLButtonElement =
-    document.getElementById("increase-button1") as HTMLButtonElement;
-const decreaseButton1: HTMLButtonElement =
-    document.getElementById("decrease-button1") as HTMLButtonElement;
-const speedLabel1: HTMLSpanElement =
-    document.getElementById("speed-label1") as HTMLSpanElement;
-
-const increaseButton2: HTMLButtonElement =
-    document.getElementById("increase-button2") as HTMLButtonElement;
-const decreaseButton2: HTMLButtonElement =
-    document.getElementById("decrease-button2") as HTMLButtonElement;
-const speedLabel2: HTMLSpanElement =
-    document.getElementById("speed-label2") as HTMLSpanElement;
-
-speedLabel1.textContent = `Left Speed: ${dial1.angleIncrement}`;
-speedLabel2.textContent = `Right Speed: ${dial2.angleIncrement}`;
+animate();
 
 function resetDials(): void {
+    cancelAnimationFrame(frameHandle);
     dial1.angle = 0;
     dial2.angle = 0;
     points = [];
+    animate();
 }
 
-increaseButton1.addEventListener("click", () => {
+const speedLabel1: HTMLSpanElement = document.getElementById("speed-label1") as HTMLSpanElement;
+const speedLabel2: HTMLSpanElement = document.getElementById("speed-label2") as HTMLSpanElement;
+speedLabel1.textContent = dial1.angleIncrement.toString();
+speedLabel2.textContent = dial2.angleIncrement.toString();
+
+const plusButton1: HTMLButtonElement = document.getElementById("plus-button1") as HTMLButtonElement;
+const minusButton1: HTMLButtonElement = document.getElementById("minus-button1") as
+    HTMLButtonElement;
+const plusButton2: HTMLButtonElement = document.getElementById("plus-button2") as HTMLButtonElement;
+const minusButton2: HTMLButtonElement = document.getElementById("minus-button2") as
+    HTMLButtonElement;
+
+plusButton1.addEventListener("click", () => {
     dial1.angleIncrement++;
-    speedLabel1.textContent = `Left Speed: ${dial1.angleIncrement}`;
+    speedLabel1.textContent = dial1.angleIncrement.toString();
     resetDials();
 });
 
-decreaseButton1.addEventListener("click", () => {
+minusButton1.addEventListener("click", () => {
     dial1.angleIncrement--;
-    speedLabel1.textContent = `Left Speed: ${dial1.angleIncrement}`;
+    speedLabel1.textContent = dial1.angleIncrement.toString();
     resetDials();
 });
 
-increaseButton2.addEventListener("click", () => {
+plusButton2.addEventListener("click", () => {
     dial2.angleIncrement++;
-    speedLabel2.textContent = `Right Speed: ${dial2.angleIncrement}`;
+    speedLabel2.textContent = dial2.angleIncrement.toString();
     resetDials();
 });
 
-decreaseButton2.addEventListener("click", () => {
+minusButton2.addEventListener("click", () => {
     dial2.angleIncrement--;
-    speedLabel2.textContent = `Right Speed: ${dial2.angleIncrement}`;
+    speedLabel2.textContent = dial2.angleIncrement.toString();
+    resetDials();
+});
+
+const resetButton: HTMLButtonElement = document.getElementById("reset-button") as HTMLButtonElement;
+resetButton.addEventListener("click", () => {
     resetDials();
 });
