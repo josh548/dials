@@ -29,6 +29,7 @@ class Dial {
         context.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
         context.stroke();
 
+        context.fillStyle = "#000000";
         context.beginPath();
         context.arc(this.x, this.y, pointRadius, 0, Math.PI * 2);
         context.fill();
@@ -83,7 +84,8 @@ const dial2: Dial = new Dial(
 let points: Point[] = [];
 let frameHandle: number;
 function animate(): void {
-    context.clearRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#ffffff";
+    context.fillRect(0, 0, canvas.width, canvas.height);
 
     context.strokeStyle = "rgba(0, 0, 0, 1.0)";
     dial1.draw();
