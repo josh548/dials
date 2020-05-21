@@ -1,0 +1,24 @@
+{
+  "name": "dials",
+  "version": "1.0.0",
+  "description": "Dials rotating in tandem to produce interesting shapes",
+  "scripts": {
+    "build": "tsc",
+    "build:watch": "tsc -w",
+    "lint": "tslint -p tsconfig.json"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/escamilla/dials.git"
+  },
+  "author": "Joshua Escamilla <joshua.escamilla@selu.edu>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/escamilla/dials/issues"
+  },
+  "homepage": "https://github.com/escamilla/dials#readme",
+  "devDependencies": {
+    "tslint": "^6.1.2",
+    "typescript": "^3.9.3"
+  }
+}
