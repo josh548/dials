@@ -6,16 +6,16 @@ canvas.height = canvasSize;
 
 const context: CanvasRenderingContext2D = canvas.getContext("2d") as CanvasRenderingContext2D;
 
-const pointRadius: number = 3;
+const pointRadius = 3;
 
 class Dial {
     public readonly x: number;
     public readonly y: number;
     public readonly radius: number;
     public angleIncrement: number;
-    public angle: number = 0;
-    public tangentX: number = 0;
-    public tangentY: number = 0;
+    public angle = 0;
+    public tangentX = 0;
+    public tangentY = 0;
 
     public constructor(x: number, y: number, radius: number, angleIncrement: number) {
         this.x = x;
@@ -110,7 +110,7 @@ function animate(): void {
     context.strokeStyle = "rgba(0, 0, 0, 1.0)";
     const newPoint: Point = { x: dial2.tangentX, y: dial1.tangentY };
     points.push(newPoint);
-    for (let i: number = 0; i < points.length - 1; i++) {
+    for (let i = 0; i < points.length - 1; i++) {
         context.beginPath();
         context.moveTo(points[i].x, points[i].y);
         context.lineTo(points[i + 1].x, points[i + 1].y);
